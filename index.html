@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOE-TA | Find Your Perfect Pair</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { brand: '#ff4d00', dark: '#0a0a0a' }, borderRadius: { '4xl': '2.5rem' } } }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Inter:wght@400;600;900&display=swap');
+        body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .heading-font { font-family: 'Syne', sans-serif; text-transform: uppercase; }
+        .view-section { display: none; animation: fadeIn 0.4s ease-out; }
+        .view-active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+        .glass { backdrop-filter: blur(14px); background: rgba(255, 255, 255, 0.85); }
+        .dark .glass { background: rgba(10, 10, 10, 0.85); }
+    </style>
+</head>
+<body class="bg-[#fafafa] dark:bg-dark text-dark dark:text-white transition-colors">
+
+<nav class="sticky top-0 z-[100] glass border-b dark:border-zinc-800 px-8 py-5 flex justify-between items-center">
+    <div class="text-3xl font-black heading-font tracking-tighter cursor-pointer" onclick="showView('home')">
+        SHOE-<span class="text-brand">TA</span>
+    </div>
+    <ul class="hidden lg:flex gap-10 text-[10px] font-black uppercase tracking-widest">
+        <li class="hover:text-brand cursor-pointer" onclick="showView('home')">Home</li>
+        <li class="hover:text-brand cursor-pointer" onclick="showView('shop')">Shop</li>
+        <li id="staff-nav" class="hidden text-brand cursor-pointer font-black" onclick="showView('admin')">Staff Console</li>
+    </ul>
+    <div class="flex items-center gap-5">
+        <button onclick="toggleTheme()" class="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-full">🌓</button>
+        <div id="auth-zone">
+            <button onclick="showView('login')" class="bg-dark dark:bg-white text-white dark:text-dark px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Sign In</button>
+        </div>
+        <div id="user-profile" class="hidden items-center gap-3">
+            <span id="role-tag" class="text-[8px] font-black px-2 py-1 rounded bg-brand text-white uppercase">GUEST</span>
+            <button onclick="logout()" class="text-[10px] font-bold opacity-50 hover:text-brand uppercase">Logout</button>
+        </div>
+        <button onclick="toggleSidebar('cart', true)" class="relative p-2">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+            <span id="cart-badge" class="absolute -top-1 -right-1 bg-brand text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold">0</span>
+        </button>
+    </div>
+</nav>
+
+<main id="home-view" class="view-section view-active">
+    <header class="p-6 h-[80vh] flex items-end">
+        <div class="w-full h-full rounded-4xl bg-cover bg-center relative overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=1600')">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-16 flex flex-col justify-end">
+                <h1 class="text-6xl md:text-[9rem] font-black heading-font text-white leading-[0.8] italic mb-8">FIND YOUR<br>PERFECT PAIR</h1>
+                <button onclick="showView('shop')" class="w-fit bg-brand text-white px-12 py-5 rounded-full font-black uppercase tracking-widest hover:scale-105 transition-transform">Enter Marketplace</button>
+            </div>
+        </div>
+    </header>
+</main>
+
+<main id="shop-view" class="view-section p-8 max-w-[1600px] mx-auto">
+    <div class="flex flex-col md:flex-row justify-between items-end mb-12 border-b-2 dark:border-zinc-800 pb-8">
+        <h2 class="text-5xl font-black heading-font italic">Market</h2>
+        <input type="text" id="shop-search" onkeyup="renderProducts()" placeholder="Search..." class="bg-zinc-100 dark:bg-zinc-900 px-8 py-4 rounded-full outline-none w-full md:w-96 border-2 border-transparent focus:border-brand">
+    </div>
+    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+</main>
+
+<main id="admin-view" class="view-section p-8 max-w-7xl mx-auto">
+    <div class="grid lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 bg-white dark:bg-zinc-900 p-8 rounded-4xl border dark:border-zinc-800">
+            <h3 class="text-2xl font-black heading-font mb-6 italic">Operational Monitoring</h3>
+            <div id="admin-only-reports" class="hidden mb-8 p-6 bg-brand/5 border border-brand/20 rounded-3xl">
+                <p class="text-[10px] font-black text-brand uppercase mb-2">Platform Revenue</p>
+                <p id="total-revenue" class="text-4xl font-black">$0.00</p>
+            </div>
+            <div class="space-y-4" id="staff-order-list"></div>
+        </div>
+        <div class="bg-dark text-white p-8 rounded-4xl">
+            <h3 class="text-2xl font-black heading-font mb-6 italic">Inventory Management</h3>
+            <form onsubmit="addProduct(event)" class="space-y-4 mb-10">
+                <input id="p-name" placeholder="Shoe Name" class="w-full bg-white/10 p-4 rounded-2xl outline-none" required>
+                <input id="p-price" type="number" placeholder="Price" class="w-full bg-white/10 p-4 rounded-2xl outline-none" required>
+                <select id="p-cat" class="w-full bg-white/10 p-4 rounded-2xl outline-none"><option>Sports</option><option>Casual</option><option>Trendy</option></select>
+                <input id="p-img" placeholder="Image URL" class="w-full bg-white/10 p-4 rounded-2xl outline-none">
+                <button class="w-full bg-brand py-4 rounded-2xl font-black uppercase">Publish Stock</button>
+            </form>
+            <div id="staff-stock-list" class="space-y-2 border-t border-white/10 pt-6"></div>
+        </div>
+    </div>
+</main>
+
+<main id="login-view" class="view-section pt-32 px-6">
+    <div class="max-w-md mx-auto bg-white dark:bg-zinc-900 p-12 rounded-4xl shadow-2xl border dark:border-zinc-800 text-center">
+        <h2 class="text-4xl font-black heading-font italic mb-8">Sign In</h2>
+        <form onsubmit="handleAuth(event)" class="space-y-4">
+            <input type="email" id="auth-email" placeholder="Email" class="w-full bg-zinc-100 dark:bg-zinc-800 p-5 rounded-2xl outline-none border-2 border-transparent focus:border-brand" required>
+            <input type="password" id="auth-pass" placeholder="Password" class="w-full bg-zinc-100 dark:bg-zinc-800 p-5 rounded-2xl outline-none border-2 border-transparent focus:border-brand" required>
+            <button class="w-full bg-brand text-white py-5 rounded-2xl font-black uppercase tracking-widest">Identify</button>
+        </form>
+    </div>
+</main>
+
+<div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-zinc-900 z-[200] shadow-2xl translate-x-full transition-transform duration-500 p-10 flex flex-col">
+    <h2 class="text-3xl font-black heading-font italic mb-10">Your Bag</h2>
+    <div id="cart-items" class="flex-grow space-y-4 overflow-y-auto"></div>
+    <div class="mt-8 border-t-2 pt-8 border-dark dark:border-white">
+        <div class="flex justify-between text-2xl font-black mb-6"><span>Total</span><span id="cart-total">$0.00</span></div>
+        <button onclick="processCheckout()" class="w-full bg-brand text-white py-5 rounded-2xl font-black uppercase">Place Order</button>
+        <button onclick="toggleSidebar('cart', false)" class="w-full mt-4 text-[10px] font-black uppercase opacity-40">Close</button>
+    </div>
+</div>
